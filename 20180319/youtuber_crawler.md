@@ -1,6 +1,9 @@
 補充 - Youtuber 相關資料爬蟲程式參考
 ================
 
+-   資料來源網站: [SocialBlade](https://socialblade.com/)
+-   資料擷取時間: 2018/03/14
+
 R code
 ------
 
