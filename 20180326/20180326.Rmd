@@ -54,25 +54,20 @@ head(youtuber)
 ### 數值資料
 
 ```{r, warning=FALSE, message=FALSE}
-#sum()
-#max()
-#min()
-#mean()
-#median()
-#quantile(1:10)
+sum(youtuber$UPLOADS)
+max(youtuber$SUBSCRIBERS)
+min(youtuber$SUBSCRIBERS)
+mean(youtuber$VIEWS)
+median(youtuber$VIEWS)
+quantile(youtuber$VIEWS, 0.9)
 ```
 
 
 ### 類別資料
 
 ```{r, warning=FALSE, message=FALSE}
-#table()
-#prop.table()
-```
-
-### 補充
-
-```{r, warning=FALSE, message=FALSE}
-#summary()
-#group_by()
+tab = table(youtuber$TYPE)
+tab
+prop.table(tab)
+table(youtuber$TYPE, youtuber$YEAR)
 ```
