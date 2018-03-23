@@ -1,0 +1,78 @@
+---
+title: "基本描述性統計分析"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
+library(dplyr)
+library(maps)
+youtuber = readRDS("../20180319/20180319_files/youtuber.rds")
+youtuber = youtuber %>%
+  mutate(
+    UPLOADS = as.numeric(gsub(",", "", UPLOADS)),
+    SUBSCRIBERS = as.numeric(gsub(",", "", SUBSCRIBERS)),
+    VIEWS = as.numeric(gsub(",", "", VIEWS))
+  ) %>%
+  filter(
+    UPLOADS > 0,
+    SUBSCRIBERS > 0,
+    VIEWS > 0,
+    COUNTRY != "",
+    TYPE != ""
+  )
+iso = iso3166 %>%
+  select(a2, ISOname, mapname) %>%
+  distinct(a2, .keep_all=TRUE)
+youtuber = youtuber %>%
+  left_join(iso, by=c("COUNTRY"="a2"))
+```
+
+## 資料整理(續)
+
+### 儲存最終資料
+
+```{r, warning=FALSE, message=FALSE}
+## 透過計算字元數的方式僅擷取最後四碼年份
+youtuber = youtuber %>%
+  mutate(n_char = nchar(as.character(CREATED))) %>%
+  mutate(YEAR = as.numeric(substr(CREATED, n_char-3, n_char)))
+
+## 儲存整理完畢的資料，以後就可以直接讀取使用
+saveRDS(youtuber, "20180326_files/youtuber.rds")
+
+## 檢視前幾筆資料內容
+head(youtuber)
+```
+
+
+## 描述性統計量
+
+### 數值資料
+
+```{r, warning=FALSE, message=FALSE}
+#sum()
+#max()
+#min()
+#mean()
+#median()
+#quantile(1:10)
+```
+
+
+### 類別資料
+
+```{r, warning=FALSE, message=FALSE}
+#table()
+#prop.table()
+```
+
+### 補充
+
+```{r, warning=FALSE, message=FALSE}
+#summary()
+#group_by()
+```
