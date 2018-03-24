@@ -54,20 +54,36 @@ head(youtuber)
 ### 计戈
 
 ```{r, warning=FALSE, message=FALSE}
+## 羆
 sum(youtuber$UPLOADS)
+
+## 程
 max(youtuber$SUBSCRIBERS)
+
+## 程
 min(youtuber$SUBSCRIBERS)
+
+## キА计
 mean(youtuber$VIEWS)
+
+## い计
 median(youtuber$VIEWS)
-quantile(youtuber$VIEWS, 0.9)
+
+## だ计
+quantile(youtuber$VIEWS, probs=0.9)
 ```
 
 
 ### 摸戈
 
 ```{r, warning=FALSE, message=FALSE}
+## Ω计稪俱
 tab = table(youtuber$TYPE)
 tab
+
+## 盢 table 璸衡ㄓΩ计锣传ゑㄒ
 prop.table(tab)
+
+## 蛮跑计羛
 table(youtuber$TYPE, youtuber$YEAR)
 ```
