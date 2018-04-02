@@ -1,0 +1,170 @@
+---
+title: "文本分析 - 詞頻"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 爬蟲
+
+- 相關爬蟲細節請參考 [3/12 講義](https://github.com/ytshen1207/1062SHU/blob/master/20180312/20180312.md)
+- 爬蟲日期：2018/04/02
+
+```{r, warning=FALSE, eval=FALSE}
+## 載入 rvest 套件
+library(rvest)
+
+## 指定附加參數的爬蟲目標網址
+url = "https://www.google.com.tw/search?q=youtuber&num=50&lr=lang_zh-TW"
+
+## 指定文字編碼讀取頁面
+search_page = read_html(url, encoding="CP950")
+
+## 根據 CSS 選擇器規則獲取目標 nodes
+search_node = html_nodes(search_page, css=".st , .r a")
+
+## 擷取爬蟲結果的文字部分
+search_result = html_text(search_node)
+
+## 儲存爬蟲結果
+#saveRDS(search_result, "20180409_files/text.rds")
+```
+
+## 斷詞
+
+### 基本斷詞
+
+```{r, warning=FALSE}
+## 載入 jiebaR 套件
+library(jiebaR)
+
+## 範例文本
+SHU = "世新大學（Shih Hsin University，中文簡稱「世新」、英文簡稱「SHU」）位於中華民國台北市文山區的一所私立大學。
+
+創辦人成舍我於1933年創立「北平新聞專科學校」，政府遷台後於1956年創立世界新聞職業學校，並秉持「學校為學生而辦，學生為讀書而來」的辦學原則。
+
+1960年，改名世界新聞專科學校。
+
+1991年，改制世界新聞傳播學院。
+
+1997年，改名世新大學。"
+
+## 建立一個分詞器
+wk = worker()
+
+## 進行斷詞
+seg = segment(SHU, wk)
+# seg = wk[SHU]
+# seg = wk <= SHU
+
+## 檢視斷詞結果
+seg
+```
+
+### 詞性標記
+
+- [ICTCLAS 詞性標記](https://gist.github.com/luw2007/6016931)
+
+```{r, warning=FALSE}
+## 建立一個分詞器，設定 type = "tag"
+wk = worker(type="tag")
+
+## 進行斷詞
+seg = segment(SHU, wk)
+
+## 檢視斷詞結果
+seg
+```
+
+### 新增停止詞
+
+停止詞就是一些無關乎語意的詞彙，通常會在進行文本分析的時候先行清除掉。
+jiebaR 本身已有內建部分常見停止詞，如果要另外新增自定義的停止詞，可以定義在一個純文字檔內，透過 worker 中的 stop_word 參數進行引入。
+
+```{r}
+## 建立一個分詞器，設定 stop_word 為自行建立的停止詞檔案路徑
+wk = worker(type="tag", stop_word="20180409_files/stop_words.txt")
+
+## 進行斷詞
+seg = segment(SHU, wk)
+
+## 檢視斷詞結果
+seg
+```
+
+### 建立新詞彙
+
+有時候斷詞系統無法完美的斷出預期的結果，這種情況常發生於專有名詞、姓名、簡稱等。
+此時可透過新增詞彙字典的方式輔助斷詞系統進行判斷。
+
+```{r, warning=FALSE}
+## 使用 new_user_word 函數建立新詞，第三個參數為詞性
+new_user_word(wk, c("世新","文山區","成舍我"), c("n","n","n")) 
+
+## 進行斷詞
+seg = segment(SHU, wk)
+
+## 檢視斷詞結果
+seg
+```
+
+## 詞頻分析
+
+### 詞頻
+
+以先前爬取的 youtuber 相關搜尋內容進行文本分析實作。
+
+```{r, warning=FALSE}
+## 載入 dplyr 套件
+library(dplyr)
+
+## 讀取爬蟲結果
+search_result = readRDS("20180409_files/text.rds")
+
+## 建立分詞器
+wk = worker()
+
+## 進行斷詞
+seg = segment(search_result, wk)
+
+## 將英文轉小寫
+seg = tolower(seg)  # 轉大寫 toupper()
+
+## 僅取出字元數大於 1 者計算詞彙頻率
+f = freq(seg) %>%
+  filter(nchar(char) > 1) %>%
+  filter(char != "youtuber") %>%
+  arrange(desc(freq))
+
+## 檢視前幾筆結果
+head(f)
+```
+
+### 文字雲
+
+文字雲是呈現詞彙熱門程度(出現頻率)最直觀的方法。
+
+```{r, warning=FALSE}
+## 安裝並載入 wordcloud 套件
+# install.package("wordcloud")
+library(wordcloud)
+
+## 繪製文字雲
+wordcloud(f$char, f$freq, min.freq=5, colors=rainbow(1000))
+```
+
+```{r, warning=FALSE, eval=FALSE}
+## 安裝並載入 wordcloud2 套件
+# install.package("wordcloud2")
+library(wordcloud2)
+
+## 繪製文字雲
+wordcloud2(f, minSize=5, fontFamily="微軟正黑體", color="random-light", backgroundColor="grey")
+```
+
+```{r, warning=FALSE, echo=FALSE}
+library(webshot)
+webshot("20180409_files/wordcloud.html", "20180409_files/wordcloud.png", delay = 5)
+```
