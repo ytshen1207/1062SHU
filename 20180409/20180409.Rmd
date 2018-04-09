@@ -158,10 +158,18 @@ wordcloud(f$char, f$freq, min.freq=5, colors=rainbow(1000))
 ```{r, warning=FALSE, eval=FALSE}
 ## 安裝並載入 wordcloud2 套件
 # install.package("wordcloud2")
+# 或
+# install.packages("devtools")
+# library(devtools)
+# install_github("lchiffon/wordcloud2")
 library(wordcloud2)
 
 ## 繪製文字雲
 wordcloud2(f, minSize=5, fontFamily="微軟正黑體", color="random-light", backgroundColor="grey")
+
+## 自定義圖型
+# wordcloud2(data, shape, figPath)
+# letterCloud()
 ```
 
 ```{r, warning=FALSE, echo=FALSE}
