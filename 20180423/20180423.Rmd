@@ -16,49 +16,79 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### 讀取資料檔
 
-```{r, warning=FALSE}
+```{r, warning=FALSE, message=FALSE}
+library(dplyr)
 youtuber = readRDS("20180423_files/youtuber.rds")
 ```
 
 
 ### 主要地區分布
 
-```{r, warning=FALSE, eval=FALSE}
+```{r, warning=FALSE}
+## 安裝並載入 rworldmap 套件
+# install.packages("rworldmap")
 library(rworldmap)
-library(dplyr)
 
-df = youtuber %>%
+## 計算各國家 youtuber 出現在 top 5000 的次數
+df_map = youtuber %>%
   group_by(COUNTRY) %>%
-  summarise(subs = mean(SUBSCRIBERS)) %>%
-  joinCountryData2Map("ISO2", "COUNTRY")
+  summarise(COUNT = n())
 
-mapCountryData(df, "subs")
+## 透過 rworldmap 的 joinCountryData2Map 函數轉換為地圖的繪圖的資料型態
+map_data = joinCountryData2Map(df_map,
+                               joinCode = "ISO2",
+                               nameJoinColumn = "COUNTRY")
+
+## 繪製地圖
+mapCountryData(map_data,
+               nameColumnToPlot = "COUNT",
+               catMethod = "logFixedWidth",
+               mapTitle = "Distribution of Top YouTubers in the World")
 ```
 
 
 ### 成長趨勢
 
-```{r, warning=FALSE, eval=FALSE}
-library(wordcloud)
-f = freq(seg)
-wordcloud(f$char, f$freq, min.freq=5, colors=rainbow(1000))
+```{r, warning=FALSE}
+## 載入 ggplot2 套件
+library(ggplot2)
+
+## 篩選有興趣的頻道類別，依年份繪製各分類頻道的趨勢分布，並設定透明度 alpha
+youtuber %>%
+  filter(TYPE %in% c("Comedy","Entertainment","Games","Music","People")) %>%
+  ggplot(aes(YEAR, fill=TYPE)) +
+  geom_density(alpha=0.5)
 ```
 
 
 ### 頻道分類概況
 
-```{r, warning=FALSE, eval=FALSE}
-library(wordcloud)
-f = freq(seg)
-wordcloud(f$char, f$freq, min.freq=5, colors=rainbow(1000))
+```{r, warning=FALSE}
+## 所有頻道次數長條圖
+youtuber %>%
+  ggplot(aes(TYPE)) +
+  geom_bar(fill="lightblue") +
+  theme(axis.text.x = element_text(angle=30))
+
+## 台灣頻道類型圓餅圖
+youtuber %>%
+  filter(mapname == "Taiwan") %>%
+  ggplot(aes(x="", fill=TYPE)) +
+  geom_bar(width=1) +
+  coord_polar("y") +
+  labs(x="", y="")
 ```
 
 
 ### 訂閱數 vs 影片數 vs 瀏覽量
 
-```{r, warning=FALSE, eval=FALSE}
-library(wordcloud)
-f = freq(seg)
-wordcloud(f$char, f$freq, min.freq=5, colors=rainbow(1000))
+```{r, warning=FALSE}
+## 載入 GGally 套件
+library(GGally)
+
+## 繪製散佈圖
+youtuber %>%
+  select(SUBSCRIBERS, UPLOADS, VIEWS) %>%
+  ggpairs()
 ```
 
