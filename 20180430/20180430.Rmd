@@ -1,0 +1,95 @@
+---
+title: "綜合討論"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 問題討論
+
+### 讀取資料檔
+
+```{r, warning=FALSE, message=FALSE}
+library(dplyr)
+library(ggplot2)
+youtuber = readRDS("20180430_files/youtuber.rds")
+```
+
+
+### 座標軸刻度
+
+可使用 scale_x_continuous() 函數
+
+```{r, warning=FALSE}
+youtuber %>%
+  filter(TYPE %in% c("Comedy","Entertainment","Games","Music","People")) %>%
+  ggplot(aes(YEAR, fill=TYPE)) +
+  geom_density(alpha=0.5) +
+  scale_x_continuous(breaks=2005:2017)
+```
+
+
+### Mac 中文字體
+
+可使用 theme(text=element_text(family="字體"))
+
+```{r, warning=FALSE, eval=FALSE}
+youtuber %>%
+  filter(mapname == "Taiwan") %>%
+  ggplot(aes(x="", fill=TYPE)) +
+  geom_bar(width=1) +
+  coord_polar("y") +
+  labs(title="台灣 YouTuber 頻道類型圓餅圖", x="", y="") +
+  theme(text = element_text(family="STKaiti"))
+```
+
+```{r, warning=FALSE, echo=FALSE}
+youtuber %>%
+  filter(mapname == "Taiwan") %>%
+  ggplot(aes(x="", fill=TYPE)) +
+  geom_bar(width=1) +
+  coord_polar("y") +
+  labs(title="台灣 YouTuber 頻道類型圓餅圖", x="", y="")
+```
+
+
+### 繪圖的資料型態
+
+- 未經次數彙整的原始資料
+
+```{r, warning=FALSE}
+head(youtuber)
+```
+
+```{r, warning=FALSE}
+youtuber %>%
+  ggplot(aes(TYPE)) +
+  geom_bar(fill="lightblue") +
+  theme(axis.text.x = element_text(angle=30))
+```
+
+- 經次數彙整的次級資料
+
+```{r, warning=FALSE}
+youtuber2 = youtuber %>%
+  group_by(TYPE) %>%
+  summarise(COUNT = n())
+
+head(youtuber2)
+```
+
+```{r, warning=FALSE}
+youtuber2 %>%
+  ggplot(aes(x=TYPE, y=COUNT)) +
+  geom_bar(stat="identity", fill="pink") +
+  theme(axis.text.x = element_text(angle=30))
+```
+
+
+## 常見統計謬誤
+
+- 資料
+- 方法
+- 解讀
